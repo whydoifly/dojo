@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
 import Select from 'react-select';
 import { useCollection } from '../../hooks/useCollection';
+import { timestamp } from '../../firebase/config';
+import { useAuthContext } from '../../hooks/useAuthContext';
+import { useFirestore } from '../../hooks/useFirestore';
+import { useHistory } from 'react-router-dom';
 
 // styles
 import './Create.css';
@@ -13,8 +17,11 @@ const categories = [
 ];
 
 export default function Create() {
+  const history = useHistory();
+  const { addDocument, response } = useFirestore('projects');
   const { documents } = useCollection('users');
   const [users, setUsers] = useState([]);
+  const { user } = useAuthContext();
 
   // form field values
   const [name, setName] = useState('');
@@ -27,13 +34,13 @@ export default function Create() {
   useEffect(() => {
     if (documents) {
       const options = documents.map((user) => {
-        return { value: user, label: user.displayName };
+        return { value: { ...user, id: user.id }, label: user.displayName };
       });
       setUsers(options);
     }
   }, [documents]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setFormError(null);
 
@@ -46,7 +53,33 @@ export default function Create() {
       return;
     }
 
-    console.log(name, details, dueDate, category.value, assignedUsers);
+    const assignedUsersList = assignedUsers.map((u) => {
+      return {
+        displayName: u.value.displayName,
+        photoURL: u.value.photoURL,
+        id: u.value.id,
+      };
+    });
+    const createdBy = {
+      displayName: user.displayName,
+      photoURL: user.photoURL,
+      id: user.uid,
+    };
+
+    const project = {
+      name,
+      details,
+      assignedUsersList,
+      createdBy,
+      category: category.value,
+      dueDate: timestamp.fromDate(new Date(dueDate)),
+      comments: [],
+    };
+
+    await addDocument(project);
+    if (!response.error) {
+      history.push('/');
+    }
   };
 
   return (
