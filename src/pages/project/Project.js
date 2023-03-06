@@ -1,7 +1,8 @@
 import { useParams } from 'react-router-dom';
 import { useDocument } from '../../hooks/useDocument';
+import ProjectSummary from './ProjectSummary';
 
-// styles 
+// styles
 import './Project.css';
 
 export default function Project() {
@@ -13,7 +14,7 @@ export default function Project() {
   if (!document) return <p>Loading...</p>;
   return (
     <div className='project-details'>
-      <h1>{document.name}</h1>
+      <ProjectSummary project={document} />
     </div>
-  )
+  );
 }
