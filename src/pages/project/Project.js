@@ -4,6 +4,7 @@ import ProjectSummary from './ProjectSummary';
 
 // styles
 import './Project.css';
+import ProjectComments from './ProjectComments';
 
 export default function Project() {
   const { id } = useParams();
@@ -15,6 +16,7 @@ export default function Project() {
   return (
     <div className='project-details'>
       <ProjectSummary project={document} />
+      <ProjectComments />
     </div>
   );
 }
